@@ -2,7 +2,8 @@
 import time
 import pprint as pp
 import sensors
-
+import notifications
+import random
 
 class Guardian(object):
     """HomeGuardian is a security system for python"""
@@ -19,6 +20,8 @@ class Guardian(object):
         self.sensors = {}
         self.sensors["binary"] = {}
         self.sensors["numeric"] = {}
+        self.notify = notifications.MockNotification()
+        self.already_n = []
 
     def create_sensors(self):
         for name in self.numeric_sensors_names:
@@ -46,20 +49,18 @@ class Guardian(object):
         # crearsensores
         self.create_sensors()
         while True:
-            state = self.get_state()
-        #       if condiciones:
-        #           notificar()
-        #       sleep(1)
-            pp.pprint(state, indent=4,width=30)
-            for bs in self.sensors["binary"]:
-                if self.sensors["binary"][bs]:
-                    print "*",
-                else:
-                    print ".",
-            print
-            time.sleep(1)
+            self.get_state()
+
+            for ns in self.sensors["numeric"]:
+                if self.sensors["numeric"][ns] > 15.0 \
+                    and ns not in self.already_n:
+                    self.notify.notify(ns)
+                    self.already_n.append(ns)
+#            print(self.sensors)
+            time.sleep(0.2)
         pass
 
 if __name__ == '__main__':
+    random.seed(1)
     guardian = Guardian()
     guardian.main()
